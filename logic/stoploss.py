@@ -7,7 +7,7 @@ from logic.candle import Candle
 
 class StopLoss(Indicator):
 
-    def __init__(self, atr_period_length = 7):
+    def __init__(self, atr_period_length = 14):
         super(StopLoss,self).__init__()
         self.period = atr_period_length
         self._high = []
@@ -42,10 +42,9 @@ class StopLoss(Indicator):
                     # Should buy back short position
                     self.state = MarketTrend.STOP_SHORT
                     self.current_stop_price = 0.0
-        
+
 
     def Update(self, datapoint):
-
         if not isinstance(datapoint, Candle):
             self.TickerUpdate(datapoint)
             return
@@ -69,7 +68,6 @@ class StopLoss(Indicator):
         self.state = MarketTrend.NO_STOP
 
     def GetPrice(self, position_type = MarketTrend.ENTER_LONG):
-
         if (not self.SeenEnoughData()):
             return 0.0
 
@@ -91,7 +89,6 @@ class StopLoss(Indicator):
     def CancelStop(self):
         self.state = MarketTrend.NO_STOP
         self.current_stop_price = 0.0
-		
+
     def IsSet(self):
         return self.trading_enabled
-		

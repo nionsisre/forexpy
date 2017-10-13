@@ -30,13 +30,13 @@ class TrailingStop(Indicator):
     def TickerUpdate(self, datapoint):
         if not ValidateDatapoint(datapoint):
             return
-        
+
         if not self.trading_enabled:
             return
-        
+
         if self.current_stop_price <= 0.0:
             return
-        
+
         # Adjust the stop price if needed
         if (self.position_type == MarketTrend.ENTER_LONG):
             if datapoint["value"] > self.peak_price:
@@ -79,7 +79,7 @@ class TrailingStop(Indicator):
 
         if self.trading_enabled:
             self.current_stop_price = self.GetPrice(self.position_type)
-        
+
     def SetStop(self, position_type = MarketTrend.ENTER_LONG):
         if (position_type != MarketTrend.ENTER_LONG and position_type != MarketTrend.ENTER_SHORT):
             return

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from settings import *
 from util.mail import Email
 from util.ui import CursedUI
@@ -7,6 +8,7 @@ from logic.strategy import Strategy
 import traceback
 import logging
 import sys
+import os
 
 logging.basicConfig(filename='oandabot.log',
                     level=logging.INFO,
@@ -31,7 +33,8 @@ oa = Oanda(ACCESS_TOKEN,
 strategy = Strategy(oa,
                     CANDLES_MINUTES,
                     email=email,
-                    risk=MAX_PERCENTAGE_ACCOUNT_AT_RISK)
+                    risk=MAX_PERCENTAGE_ACCOUNT_AT_RISK,
+                    stoploss=STOP_LOSS)
 
 ui = CursedUI(oa, strategy, INSTRUMENT, ACCOUNT_CURRENCY)
 
@@ -78,5 +81,10 @@ def Main():
 if __name__ == "__main__":
     try:
         Main()
+    except KeyboardInterrupt:
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
     except Exception as e:
         HandleExceptions(e)

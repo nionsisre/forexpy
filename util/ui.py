@@ -1,6 +1,6 @@
 import curses
 from exchange.oanda import Oanda
-from logic.strategy import Strategy 
+from logic.strategy import Strategy
 from logic import ValidateDatapoint
 
 class CursedUI(object):
@@ -101,7 +101,7 @@ class CursedUI(object):
             self.stdscr.refresh()
             tstatus = self._strategy.TradingStatus()
             self._strategy.ResumeTrading()
-            self._strategy.ClosePosition()
+            self._strategy.ClosePosition('both')
             self._strategy.SetTradingStatus(tstatus)
 
         # p - pause strategy

@@ -24,7 +24,7 @@ def GetDataPointValue(datapoint):
         return result
 
     try:
-        if datapoint.has_key("value"):
+        if "value" in datapoint:
             result["value"] = float(datapoint["value"])
             return result
     except:

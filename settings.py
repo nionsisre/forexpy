@@ -1,6 +1,6 @@
 # Account settings
-ACCOUNT_ID = "0070070"
-ACCESS_TOKEN = "166acab665f0bd72c33aee2d02037829-00700707adc454f3a0e075cf0351aa8c"
+ACCOUNT_ID = "101-004-6915582-001"
+ACCESS_TOKEN = "9d533eda015cd715c939ea0dd168df50-f84a47446e936bc2009ecf0d0f0a2f5d"
 ENVIRONMENT = "practice" # change this to "live" for production
 
 # Pair to trade.
@@ -16,10 +16,11 @@ HOME_BASE_CURRENCY_PAIR = "EUR_USD"
 HOME_BASE_CURRENCY_PAIR_DEFAULT_EXCHANGE_RATE = 0.88
 
 # Size of candles in minutes
-CANDLES_MINUTES = 120
+CANDLES_MINUTES = 1
 
 #Risk settings
-MAX_PERCENTAGE_ACCOUNT_AT_RISK = 2 # NO more then 2% of account per trade
+MAX_PERCENTAGE_ACCOUNT_AT_RISK = 2 # percent
+STOP_LOSS = 100 # atr stop loss
 
 #Email credentials
 EMAIL_RECIPIENT = "youremail@gmail.com"
@@ -29,9 +30,9 @@ EMAIL_PORT=25
 EMAIL_PASSWORD="SuchSecurePasswordStoredUnecrypted"
 
 # Special bot name for identification
-# In case you have many and want to distinguish between them 
+# In case you have many and want to distinguish between them
 # Leave default if only running one bot
 BOT_NAME = "OANDAPYBOT"
 
 # For backtesting
-BACKTESTING_FILENAME = "backtest/data/EURUSD/DAT_ASCII_EURUSD_M1_2015.csv"
+BACKTESTING_FILENAME = "DAT_MT_EURUSD_M1_2016.csv"

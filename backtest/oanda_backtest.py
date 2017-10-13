@@ -1,15 +1,15 @@
-# wrapper around oanda's RESTful api
 import datetime
 import time
 import math
-
+import os
+import logging
+from tqdm import tqdm
 from exchange import oandapy
 from logic import MarketTrend
+from logic.candle import Candle
 from logic.strategy import Strategy
 
-import logging
-
-logging.basicConfig(filename='backtest-'+str(int(time.time()))+'.log',
+logging.basicConfig(filename='backtest.log',
                     level=logging.INFO,
                     format="%(asctime)-15s %(message)s"
                     )
@@ -19,7 +19,7 @@ INSTRUMENT = "INSTR"
 
 class OandaBacktest(object):
 
-    def __init__(self, in_filename, leverage = 20.0, account_value = 100.0):
+    def __init__(self, in_filename, leverage = 20.0, account_value = 10000.0):
         self.leverage = leverage
         self.net_worth = account_value
         self.ticker_subscribers = []
@@ -42,6 +42,9 @@ class OandaBacktest(object):
         self.plot_data["StopLoss"] = []
         self.plot_data["TrailingStop"] = []
         self.plot_data["NetWorth"] = []
+        self.plot_data["short"] = []
+        self.plot_data["medium"] = []
+        self.plot_data["long"] = []
 
     def SubscribeTicker(self, obj):
         self.ticker_subscribers.append(obj)
@@ -49,6 +52,8 @@ class OandaBacktest(object):
     def StartPriceStreaming(self):
         if self.file:
             return
+        self.file_size = os.stat(self.in_filename).st_size
+        self.pbar = tqdm(total=self.file_size)
         self.file = open(self.in_filename, "r")
 
     def StopPriceStreaming(self):
@@ -56,8 +61,8 @@ class OandaBacktest(object):
             return
         self.file.close()
         self.file = None
-
-        print "TOtal PnL: " + str(self.total_PnL) + " NetWorth: " + str(self.GetNetWorth())
+        self.pbar.close()
+        print(("Total PnL: " + str(self.total_PnL) + " NetWorth: " + str(self.GetNetWorth())))
 
     def GetNetWorth(self):
         net_worth = 0.0
@@ -72,7 +77,7 @@ class OandaBacktest(object):
         return self.balance
 
     def CashInvested(self):
-        return self.cash_invested 
+        return self.cash_invested
 
     def CurrentPosition(self):
         return self.position
@@ -93,14 +98,13 @@ class OandaBacktest(object):
 
         if self.position_side == MarketTrend.ENTER_LONG:
             price_diff = self.current_price - self.last_entered_price
-        
+
         if self.position_side == MarketTrend.ENTER_SHORT:
             price_diff = self.last_entered_price - self.current_price
 
         return self.position * price_diff
 
-    def ClosePosition(self):
-
+    def ClosePosition(self, position):
         # Nothing to close - no positions open
         if (INSTRUMENT not in self.balance) or (not self.balance[INSTRUMENT]):
             return
@@ -113,19 +117,19 @@ class OandaBacktest(object):
             realizedPnL = (self.cash_invested) - (abs(self.balance[INSTRUMENT]) * self.current_price)
             realizedPnL *= self.Leverage()
             self.balance[HOME_CURRENCY] -= self.cash_invested / self.Leverage()
-            
+
         self.balance[HOME_CURRENCY] += realizedPnL
         self.balance[INSTRUMENT] = 0.0
         self.position = 0.0
-        
-        logging_str  = "Trade (" + str(self.last_update_timestamp) + "): "
+
+        logging_str  = "Trade closed (" + str(datetime.datetime.fromtimestamp(self.last_update_timestamp)) + "): "
         logging_str += str(self.position_side)
         logging_str += " from: " + str(self.last_entered_price)
         logging_str += " to: " + str(self.current_price)
-        logging_str += ". REalized PnL: " + str(realizedPnL)
+        logging_str += ". Realized PnL: " + str(realizedPnL)
         logging_str += " NetWorth: " + str(self.GetNetWorth())
-        print logging_str
-        
+        logging.info(logging_str)
+
         self.position_side = MarketTrend.NONE
 
         self.total_PnL += realizedPnL
@@ -145,6 +149,7 @@ class OandaBacktest(object):
     def Buy(self, units):
         self.position = units
         self.position_side = MarketTrend.ENTER_LONG
+
         self.balance[HOME_CURRENCY] -= (units * self.current_price) / self.Leverage()
         self.balance[INSTRUMENT] += units
         self.cash_invested = units * self.current_price
@@ -153,36 +158,60 @@ class OandaBacktest(object):
         self._createPlotRecord("Buy")
 
     def GetCandles(self, number_of_last_candles_to_get = 0, size_of_candles_in_minutes = 120):
-        return []
+        candles = []
+        for i in range(1,number_of_last_candles_to_get):
+            candles.append(self.GetCandle(size_of_candles_in_minutes))
+        return candles
+
+    def GetCandle(self, candleSize):
+        price, datapoint = self.getNextLine()
+        openTime = datapoint["now"]
+        closeTime = datetime.datetime.fromtimestamp(datapoint["now"]) + datetime.timedelta(minutes=candleSize)
+        closeTime = time.mktime(closeTime.timetuple()) + closeTime.microsecond * 0.000001
+        candle = Candle(openTime, closeTime)
+        while not candle.SeenEnoughData():
+            price, datapoint = self.getNextLine()
+            candle.Update(datapoint)
+        return candle
 
     def IsRunning(self):
         return self.file != None
+
+    def getNextLine(self):
+        if not self.file:
+            return
+        line = self.file.readline()
+        self.pbar.update(len(line))
+        if not line:
+            self.StopPriceStreaming
+
+        try:
+            date, bid, ask, bidVol, askVol = line.split(",")
+        except:
+            self.StopPriceStreaming()
+            return
+
+        price = float(bid)
+        #histdata
+        #ts = time.mktime(time.strptime(days + ' ' + minutes, '%Y.%m.%d %H:%M'))
+        ts = time.mktime(time.strptime(date, '%Y-%m-%d %H:%M:%S'))
+
+        # form a ticker
+        datapoint = {}
+        datapoint["now"] = ts
+        datapoint["value"] = price
+
+        return price, datapoint
 
     def UpdateSubscribers(self):
         # get a line
         if not self.file:
             return
 
-        line = self.file.readline()
-        if not line:
-            self.StopPriceStreaming()
-
-        # parse the line
-        # This data comes from histdata.com
-        # 20010102 041700;0.947000;0.947000;0.947000;0.947000;0
         try:
-            datestr, o, h, l, c, t = line.split(";")
+            price, datapoint = self.getNextLine()
         except:
-            self.StopPriceStreaming()
             return
-
-        price = float(c)
-        ts = time.mktime(time.strptime(datestr, '%Y%m%d %H%M%S'))
-
-        # form a ticker
-        datapoint = {}
-        datapoint["now"] = datetime.datetime.fromtimestamp(ts)
-        datapoint["value"] = price
 
         self.last_update_timestamp = datapoint["now"]
         self.current_price = price
