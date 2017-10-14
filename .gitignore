@@ -60,3 +60,5 @@ target/
 *.csv
 tick
 .vscode/tags
+
+*.pyc

@@ -1,90 +1,64 @@
 #!/usr/bin/env python3
-from settings import *
-from util.mail import Email
+import sys
+import traceback
+import logging
+from settings import ACCESS_TOKEN, ACCOUNT_ID, INSTRUMENT, \
+    ACCOUNT_CURRENCY, HOME_BASE_CURRENCY_PAIR, HOME_BASE_CURRENCY_PAIR_DEFAULT_EXCHANGE_RATE, \
+    ENVIRONMENT, CANDLES_MINUTES, MAX_PERCENTAGE_ACCOUNT_AT_RISK, STOP_LOSS
 from util.ui import CursedUI
 from exchange.oanda import Oanda
 from exchange.oanda import OandaExceptionCode
 from logic.strategy import Strategy
-import traceback
-import logging
-import sys
-import os
+
 
 logging.basicConfig(filename='oandabot.log',
                     level=logging.INFO,
-                    format="%(asctime)-15s %(message)s"
-                    )
+                    format="%(asctime)-15s %(message)s")
 
-email = Email(EMAIL_FROM,
-              EMAIL_RECIPIENT,
-              EMAIL_SERVER,
-              EMAIL_PORT,
-              EMAIL_PASSWORD,
-              BOT_NAME)
+oanda = Oanda(ACCESS_TOKEN,
+              ACCOUNT_ID,
+              INSTRUMENT,
+              ACCOUNT_CURRENCY,
+              HOME_BASE_CURRENCY_PAIR,
+              HOME_BASE_CURRENCY_PAIR_DEFAULT_EXCHANGE_RATE,
+              ENVIRONMENT)
 
-oa = Oanda(ACCESS_TOKEN,
-           ACCOUNT_ID,
-           INSTRUMENT,
-           ACCOUNT_CURRENCY,
-           HOME_BASE_CURRENCY_PAIR,
-           HOME_BASE_CURRENCY_PAIR_DEFAULT_EXCHANGE_RATE,
-           ENVIRONMENT)
-
-strategy = Strategy(oa,
+strategy = Strategy(oanda,
                     CANDLES_MINUTES,
-                    email=email,
                     risk=MAX_PERCENTAGE_ACCOUNT_AT_RISK,
                     stoploss=STOP_LOSS)
 
-ui = CursedUI(oa, strategy, INSTRUMENT, ACCOUNT_CURRENCY)
+cursed_ui = CursedUI(oanda, strategy, INSTRUMENT, ACCOUNT_CURRENCY)
 
-def HandleExceptions(e):
-    # Do proper curses deinit
-    ui.Stop()
 
+def handle_exceptions(error):
+    cursed_ui.Stop()
     traceback.print_exc()
     logging.critical(traceback.format_exc())
+    strategy.Stop()
+    ret_code = OandaExceptionCode(error)
+    sys.exit(ret_code)
 
-    # Email exception
-    txt = "\n\n The bot is exiting \n\n"
-    txt += traceback.format_exc()+"\n"+str(e)
-    email.Send(txt)
 
-    # Attempt to close positions:
-    try:
-        strategy.Stop()
-    except:
-        pass
-
-    # Return exit code
-    retCode = OandaExceptionCode(e)
-    sys.exit(retCode)
-
-def Main():
+def main():
     strategy.Start()
-    ui.Start()
+    cursed_ui.Start()
 
-    # Main UI loop here
-    while oa.IsRunning():
-        oa.UpdateSubscribers()
-        ui.ProcessUserInput()
-        if ui.IsExiting():
+    while oanda.IsRunning():
+        oanda.UpdateSubscribers()
+        cursed_ui.ProcessUserInput()
+        if cursed_ui.IsExiting():
             break
 
-    ui.Stop()
-    try:
-        strategy.Stop()
-    except:
-        pass
+    cursed_ui.Stop()
+    strategy.Stop()
     sys.exit(0)
+
 
 if __name__ == "__main__":
     try:
-        Main()
+        main()
     except KeyboardInterrupt:
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
-    except Exception as e:
-        HandleExceptions(e)
+        sys.exit(0)
+    except Exception as err:
+        handle_exceptions(err)
