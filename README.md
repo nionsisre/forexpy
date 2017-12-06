@@ -1,5 +1,7 @@
-# oandapybot
+# forexpy
 ============
+
+Forked from the previous work of https://github.com/PeterMalkin/oandapybot
 
 Simple python bot for trading forex on oanda.com
 
