@@ -1,5 +1,5 @@
 import curses
-from logic import ValidateDatapoint
+from logic import validate_datapoint
 
 
 class CursedUI(object):
@@ -9,7 +9,6 @@ class CursedUI(object):
         self._account_currency = account_currency
         self._instrument = instrument
         self.stdscr = None
-        # The stats to show
         self._net_worth = ""
         self._unrealized_pnl = ""
         self._balance = ""
@@ -26,10 +25,9 @@ class CursedUI(object):
 
     def start(self):
         self._oanda.SubscribeHeartbeat(self)
-        self._oanda.SubscribeTicker(self)
+        self._oanda.subscribe_ticker(self)
         self._oanda.Subscribeupdates(self)
 
-        # init curses
         self.stdscr = curses.initscr()
         curses.noecho()
         self.stdscr.keypad(1)
@@ -55,13 +53,13 @@ class CursedUI(object):
             self._net_worth = str(self._oanda.GetNetWorth())
             self._balance = str(self._oanda.GetBalance())
             self._i = str(self._oanda.CashInvested())
-            self._current_position = str(self._oanda.CurrentPosition())
-            self._s = str(self._oanda.CurrentPositionSide())
-            self._u = str(self._oanda.AvailableUnits())
+            self._current_position = str(self._oanda.current_position())
+            self._s = str(self._oanda.current_position_side())
+            self._u = str(self._oanda.available_units())
             self._leverage = str(self._oanda.Leverage())
             self._unrealized_pnl = str(self._oanda.UnrealizedPNL())
 
-        if ValidateDatapoint(datapoint):
+        if validate_datapoint(datapoint):
             self._current_price = str(datapoint["value"])
 
         if self._is_heartbeat_update(datapoint):
@@ -155,7 +153,8 @@ class CursedUI(object):
         self.stdscr.addstr(11, 0, "Cash invested:   " +
                            self._i + " leverage: " + self._leverage)
         self.stdscr.addstr(12, 0, "Net Worth:       " +
-                           self._net_worth + " unrealized PnL: " + self._unrealized_pnl)
+                           self._net_worth + " unrealized PnL: " +
+                           self._unrealized_pnl)
 
         # Strategy status
         self.stdscr.addstr(14, 0, "stop Loss price:     " +

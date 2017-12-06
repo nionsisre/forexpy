@@ -1,0 +1,6 @@
+[MASTER]
+ignore=CVS .git .hg 
+persistent=yes
+
+[MESSAGES CONTROL]
+disable=C0111

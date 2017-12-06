@@ -12,7 +12,7 @@ class TimeStop(Indicator):
         return self._state
     
     # Declare a stop if it's Friday, between 8:40PM and 8:45PM
-    def TickerUpdate(self, datapoint):
+    def Tickerupdate(self, datapoint):
         if not datapoint:
             return
 
@@ -43,8 +43,8 @@ class TimeStop(Indicator):
 
         self._state = MarketTrend.STOP_LONG
 
-    def Update(self, datapoint):
+    def update(self, datapoint):
 
         if not isinstance(datapoint, Candle):
-            self.TickerUpdate(datapoint)
+            self.Tickerupdate(datapoint)
             return

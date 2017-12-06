@@ -20,7 +20,9 @@ CANDLES_MINUTES = 1
 
 # Risk settings
 MAX_PERCENTAGE_ACCOUNT_AT_RISK = 2  # percent
-STOP_LOSS = 100  # atr stop loss
+STOP_LOSS = 1
+TRAILING_PERIOD = 5
+TAKE_PROFIT = 0.0020
 
 # Email credentials
 EMAIL_RECIPIENT = "youremail@gmail.com"
@@ -33,6 +35,3 @@ EMAIL_PASSWORD = "SuchSecurePasswordStoredUnecrypted"
 # In case you have many and want to distinguish between them
 # Leave default if only running one bot
 BOT_NAME = "OANDAPYBOT"
-
-# For backtesting
-BACKTESTING_FILENAME = "DAT_MT_EURUSD_M1_2016.csv"

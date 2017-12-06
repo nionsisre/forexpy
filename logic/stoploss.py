@@ -1,7 +1,7 @@
 import numpy
 import talib
 from logic import MarketTrend
-from logic import Indicator, ValidateDatapoint
+from logic import Indicator, validate_datapoint
 from logic.candle import Candle
 
 
@@ -20,14 +20,14 @@ class StopLoss(Indicator):
     def GetState(self):
         return self.state
 
-    def SeenEnoughData(self):
+    def seen_enough_data(self):
         return self.period <= len(self._high)
 
     def AmountOfDataStillMissing(self):
         return max(0, self.period - len(self._high))
 
-    def TickerUpdate(self, datapoint):
-        if not ValidateDatapoint(datapoint):
+    def Tickerupdate(self, datapoint):
+        if not validate_datapoint(datapoint):
             return
 
         # Check if it is time to do a stop loss trade
@@ -44,14 +44,14 @@ class StopLoss(Indicator):
                     self.current_stop_price = 0.0
 
 
-    def Update(self, datapoint):
+    def update(self, datapoint):
         if not isinstance(datapoint, Candle):
-            self.TickerUpdate(datapoint)
+            self.Tickerupdate(datapoint)
             return
 
-        self._high.append(datapoint.High)
-        self._low.append(datapoint.Low)
-        self._close.append(datapoint.Close)
+        self._high.append(datapoint.high)
+        self._low.append(datapoint.low)
+        self._close.append(datapoint.close)
 
         if (len(self._high)>self.period):
             self._close.pop(0)
@@ -68,7 +68,7 @@ class StopLoss(Indicator):
         self.state = MarketTrend.NO_STOP
 
     def GetPrice(self, position_type = MarketTrend.ENTER_LONG):
-        if (not self.SeenEnoughData()):
+        if (not self.seen_enough_data()):
             return 0.0
 
         high = numpy.array(self._high, dtype=float)

@@ -16,7 +16,7 @@ def GetDataPointValue(datapoint):
         return None
 
     if (isinstance(datapoint, Candle)):
-        result["value"] = float(datapoint.Close)
+        result["value"] = float(datapoint.close)
         return result
         
     if (isinstance(datapoint, HeikinAshi)):
@@ -47,10 +47,10 @@ class MovingAverage(Indicator):
     def AmountOfDataStillMissing(self):
         return max(0, self.period_count - len(self._data))
 
-    def SeenEnoughData(self):
+    def seen_enough_data(self):
         return ( len(self._data) >= self.period_count )
 
-    def Update(self, data):
+    def update(self, data):
         pass
 
 # Moving average of a price over a period of time
@@ -59,7 +59,7 @@ class SimpleMovingAverage(MovingAverage):
     def __init__(self, period_count = 1):
         super(SimpleMovingAverage,self).__init__(period_count)
 
-    def Update(self, d):
+    def update(self, d):
 
         data = GetDataPointValue(d)
 
@@ -67,7 +67,7 @@ class SimpleMovingAverage(MovingAverage):
             return
 
         if ( len(self._data) >= self.period_count ):
-            # Update current moving average, avoiding the loop over all datapoints
+            # update current moving average, avoiding the loop over all datapoints
             self.value = self.value + ( data["value"] - self._data[0]["value"] ) / len(self._data)
             # Remove outdated datapoint from the storage
             self._data.pop(0)
@@ -78,13 +78,14 @@ class SimpleMovingAverage(MovingAverage):
         # Add the data point to the storage
         self._data.append(data)
 
+
 # Moving average with exponential smoothing of a price over a period of time
 class ExponentialMovingAverage(MovingAverage):
 
     def __init__(self, period_count = 1):
         super(ExponentialMovingAverage,self).__init__(period_count)
 
-    def Update(self, d):
+    def update(self, d):
 
         data = GetDataPointValue(d)
 
@@ -94,7 +95,7 @@ class ExponentialMovingAverage(MovingAverage):
         smoothing = 2.0 / (len(self._data) + 1.0)
 
         if ( len(self._data) >= self.period_count ):
-            # Update current exponential moving average, avoiding the loop over all datapoints
+            # update current exponential moving average, avoiding the loop over all datapoints
             self.value = self.value + smoothing * ( data["value"] - self.value )
             # Remove outdated datapoint from the storage
             self._data.pop(0)

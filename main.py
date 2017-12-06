@@ -3,7 +3,8 @@ import sys
 import traceback
 import logging
 from settings import ACCESS_TOKEN, ACCOUNT_ID, INSTRUMENT, \
-    ACCOUNT_CURRENCY, HOME_BASE_CURRENCY_PAIR, HOME_BASE_CURRENCY_PAIR_DEFAULT_EXCHANGE_RATE, \
+    ACCOUNT_CURRENCY, HOME_BASE_CURRENCY_PAIR, \
+    HOME_BASE_CURRENCY_PAIR_DEFAULT_EXCHANGE_RATE, \
     ENVIRONMENT, CANDLES_MINUTES, MAX_PERCENTAGE_ACCOUNT_AT_RISK, STOP_LOSS
 from util.ui import CursedUI
 from exchange.oanda import Oanda
@@ -11,11 +12,11 @@ from exchange.oanda import OandaExceptionCode
 from logic.strategy import Strategy
 
 
-logging.basicConfig(filename='oandabot.log',
+logging.basicConfig(filename='OANDAbot.log',
                     level=logging.INFO,
                     format="%(asctime)-15s %(message)s")
 
-oanda = Oanda(ACCESS_TOKEN,
+OANDA = Oanda(ACCESS_TOKEN,
               ACCOUNT_ID,
               INSTRUMENT,
               ACCOUNT_CURRENCY,
@@ -23,35 +24,35 @@ oanda = Oanda(ACCESS_TOKEN,
               HOME_BASE_CURRENCY_PAIR_DEFAULT_EXCHANGE_RATE,
               ENVIRONMENT)
 
-strategy = Strategy(oanda,
+STRATEGY = Strategy(OANDA,
                     CANDLES_MINUTES,
                     risk=MAX_PERCENTAGE_ACCOUNT_AT_RISK,
                     stoploss=STOP_LOSS)
 
-cursed_ui = CursedUI(oanda, strategy, INSTRUMENT, ACCOUNT_CURRENCY)
+CURSED_UI = CursedUI(OANDA, STRATEGY, INSTRUMENT, ACCOUNT_CURRENCY)
 
 
 def handle_exceptions(error):
-    cursed_ui.Stop()
+    CURSED_UI.stop()
     traceback.print_exc()
     logging.critical(traceback.format_exc())
-    strategy.Stop()
+    STRATEGY.stop()
     ret_code = OandaExceptionCode(error)
     sys.exit(ret_code)
 
 
 def main():
-    strategy.Start()
-    cursed_ui.Start()
+    STRATEGY.start()
+    CURSED_UI.start()
 
-    while oanda.IsRunning():
-        oanda.UpdateSubscribers()
-        cursed_ui.ProcessUserInput()
-        if cursed_ui.IsExiting():
+    while OANDA.is_running():
+        OANDA.update_subscribers()
+        CURSED_UI.process_user_input()
+        if CURSED_UI.is_exiting():
             break
 
-    cursed_ui.Stop()
-    strategy.Stop()
+    CURSED_UI.stop()
+    STRATEGY.stop()
     sys.exit(0)
 
 

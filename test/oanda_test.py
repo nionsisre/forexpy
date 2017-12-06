@@ -20,19 +20,19 @@ class TestOanda(unittest.TestCase):
         r = self.oa.CashInvested()
         self.assertGreaterEqual(r, 0.0)
     
-    def test_CurrentPosition(self):
-        r = self.oa.CurrentPosition()
+    def test_current_position(self):
+        r = self.oa.current_position()
         self.assertGreaterEqual(r, 0.0)
 
-    def test_AvailableUnits(self):
-        r = self.oa.AvailableUnits()
+    def test_available_units(self):
+        r = self.oa.available_units()
         print r
         self.assertGreaterEqual(r, 0)
         
-    def test_GetCandles(self):
+    def test_get_candles(self):
         number_of_last_candles_to_get = 10
         size_of_candles_in_minutes = 60
-        candles = self.oa.GetCandles(number_of_last_candles_to_get, size_of_candles_in_minutes)
+        candles = self.oa.get_candles(number_of_last_candles_to_get, size_of_candles_in_minutes)
         self.assertEqual(len(candles), 10)
     
 if __name__ == '__main__':

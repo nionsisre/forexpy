@@ -1,18 +1,21 @@
 import datetime
-import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('qt5agg')
-
+import matplotlib.pyplot as plt
 
 
 class Strategyplot:
 
-    def __init__(self, debug_data, subplots):
+    def __init__(self, debug_data, subplots_no):
         self.debug_data = debug_data
-        self.subplots = subplots
+        self.figure, self.subplots = plt.subplots(subplots_no, 1, sharex=True)
         self.xfrom = None
         self.xto = None
+        if subplots_no > 1:
+            self.subplots[0].set_xlabel('')
+        plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05)
         plt.gcf().canvas.set_window_title('Backtest Results')
+        plt.style.use('Solarize_Light2')
 
         # Get the right x scale
         time = []
@@ -34,12 +37,12 @@ class Strategyplot:
             time.append(datetime.datetime.fromtimestamp(item["now"]))
             value.append(item["value"])
 
-        plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05)
-        plt.subplot(self.subplots, 1, subplot)
-        plt.plot(time, value, style)
+        self.subplots[subplot].plot(time, value, style, lw=1.0)
 
         if self.xfrom != None and self.xto != None:
-            plt.xlim([self.xfrom, self.xto])
+            self.subplots[subplot].set_xlim([self.xfrom, self.xto])
 
     def show(self):
+        figManager = plt.get_current_fig_manager()
+        figManager.window.showMaximized()
         plt.show()

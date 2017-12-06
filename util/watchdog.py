@@ -1,9 +1,8 @@
 # Basic watchdog timer that just sets a flag that should be checked
-from threading import Timer,Event
+from threading import Timer, Event
 
 
 class WatchDog(object):
-
     @staticmethod
     def Callback(event):
         import logging
@@ -11,7 +10,7 @@ class WatchDog(object):
         event.set()
 
     def __init__(self):
-        self.watchdog_timeout_seconds = 60.0 * 10 # 10 minutes
+        self.watchdog_timeout_seconds = 60.0 * 10  # 10 minutes
         self._event = Event()
         self._event.clear()
         self.timer = None
@@ -19,16 +18,17 @@ class WatchDog(object):
     def IsExpired(self):
         return self._event.is_set()
 
-    def Start(self):
-        self.timer = Timer(self.watchdog_timeout_seconds, WatchDog.Callback, [self._event])
+    def start(self):
+        self.timer = Timer(self.watchdog_timeout_seconds, WatchDog.Callback,
+                           [self._event])
         self.timer.start()
 
-    def Stop(self):
+    def stop(self):
         self._event.clear()
         if self.timer:
             self.timer.cancel()
         self.timer = None
 
-    def Reset(self):
-        self.Stop()
-        self.Start()
+    def reset(self):
+        self.stop()
+        self.start()

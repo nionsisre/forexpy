@@ -8,8 +8,8 @@ class RiskManager(object):
 
     def GetShortPositionSize(self):
         # This is just hardcoded percentage, experts suggest no more then 0.02
-        return max(0,int(floor(self._oanda.AvailableUnits() * self._risk)))
+        return max(0,int(floor(self._oanda.available_units() * self._risk)))
 
     def GetLongPositionSize(self):
         # This is just hardcoded percentage, experts suggest no more then 0.02
-        return max(0,int(floor(self._oanda.AvailableUnits() * self._risk)))
+        return max(0,int(floor(self._oanda.available_units() * self._risk)))
