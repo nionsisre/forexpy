@@ -1,6 +1,6 @@
 import datetime
 import matplotlib
-matplotlib.use('Qt5Agg')
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 
@@ -44,5 +44,4 @@ class Strategyplot:
 
     def show(self):
         figManager = plt.get_current_fig_manager()
-        figManager.window.showMaximized()
         plt.show()
