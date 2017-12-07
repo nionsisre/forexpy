@@ -1,6 +1,6 @@
 import datetime
 import matplotlib
-matplotlib.use('qt5agg')
+matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 
 

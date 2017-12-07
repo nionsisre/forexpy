@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import time
 import math
 import os
@@ -142,7 +142,7 @@ class OandaBacktest(object):
                 self.won_shorts += 1
 
         logging_str = 'Trade closed (' + str(
-            datetime.datetime.fromtimestamp(
+            datetime.fromtimestamp(
                 self.last_update_timestamp)) + '): '
         logging_str += str(self.position_side)
         logging_str += ' from: ' + str(self.last_entered_price)
@@ -191,8 +191,8 @@ class OandaBacktest(object):
     def get_candle(self, candle_size):
         _, datapoint = self.get_next_line()
         open_time = datapoint['now']
-        close_time = datetime.datetime.fromtimestamp(
-            datapoint['now']) + datetime.timedelta(minutes=candle_size)
+        close_time = datetime.fromtimestamp(
+            datapoint['now']) + timedelta(minutes=candle_size)
         close_time = time.mktime(close_time.timetuple()) + \
             close_time.microsecond * 0.000001
         candle = Candle(open_time, close_time)
@@ -216,10 +216,7 @@ class OandaBacktest(object):
         date, bid, _, _, _ = line.split(',')
 
         price = float(bid)
-        try:
-            timestamp = time.mktime(time.strptime(date, '%Y-%m-%d %H:%M:%S.%f'))
-        except ValueError:
-            timestamp = time.mktime(time.strptime(date, '%Y-%m-%d %H:%M:%S'))
+        timestamp = self.parseTime(date)
 
         # form a ticker
         datapoint = {}
@@ -227,6 +224,20 @@ class OandaBacktest(object):
         datapoint['value'] = price
 
         return price, datapoint
+
+    def parseTime(self, input_date):
+        year = int(input_date[:4])
+        month = int(input_date[5:7])
+        day = int(input_date[8:10])
+        hour = int(input_date[11:13])
+        minute = int(input_date[14:16])
+        second = int(input_date[17:19])
+        microsecond = input_date[20:26]
+        if microsecond == '':
+            microsecond = 0
+        else:
+            microsecond = int(microsecond)
+        return datetime(year, month, day, hour, minute, second, microsecond).timestamp()
 
     def update_subscribers(self):
         # get a line

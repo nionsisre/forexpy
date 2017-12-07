@@ -4,7 +4,6 @@
   test.py -h --help
 """
 import sys
-import ui
 import os.path
 from docopt import docopt
 from backtest.oanda_backtest import OandaBacktest
@@ -49,15 +48,14 @@ def main(argv):
                         trailing_period=TRAILING_PERIOD,
                         take_profit=TAKE_PROFIT)
 
-    info_icon = ui.UnicodeSequence(ui.green, "ℹ", "i")
-    ui.info('', ui.green, info_icon, ui.reset, 'Starting backtest on', argv[0])
+    print('Starting backtest on', argv[0])
 
     strategy.Start()
 
     while oanda_backtest.is_running():
         oanda_backtest.update_subscribers()
 
-    ui.info('', ui.green, info_icon, ui.reset, 'plotting results...')
+    print('plotting results...')
     plot_data = oanda_backtest.get_plot_data()
     plot_results(plot_data)
 
