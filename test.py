@@ -8,8 +8,8 @@ import os.path
 from docopt import docopt
 from backtest.oanda_backtest import OandaBacktest
 from logic.strategy import Strategy
-from settings import CANDLES_MINUTES, MAX_PERCENTAGE_ACCOUNT_AT_RISK, STOP_LOSS,\
-     TRAILING_PERIOD, TAKE_PROFIT
+from settings import CANDLES_MINUTES, MAX_PERCENTAGE_ACCOUNT_AT_RISK,\
+    STOP_LOSS, TRAILING_PERIOD, TAKE_PROFIT
 from util.plot import Strategyplot
 
 
@@ -32,7 +32,8 @@ def plot_results(plot_data):
 
 
 def main(argv):
-    arguments = docopt(__doc__, argv, help=True, version=None, options_first=False)
+    arguments = docopt(
+        __doc__, argv, help=True, version=None, options_first=False)
 
     if os.path.isfile(arguments['FILE']) is not True:
         print('File not found')
@@ -40,13 +41,14 @@ def main(argv):
 
     oanda_backtest = OandaBacktest(arguments['FILE'])
 
-    strategy = Strategy(oanda_backtest,
-                        CANDLES_MINUTES,
-                        email=None,
-                        risk=MAX_PERCENTAGE_ACCOUNT_AT_RISK,
-                        stoploss=STOP_LOSS,
-                        trailing_period=TRAILING_PERIOD,
-                        take_profit=TAKE_PROFIT)
+    strategy = Strategy(
+        oanda_backtest,
+        CANDLES_MINUTES,
+        email=None,
+        risk=MAX_PERCENTAGE_ACCOUNT_AT_RISK,
+        stoploss=STOP_LOSS,
+        trailing_period=TRAILING_PERIOD,
+        take_profit=TAKE_PROFIT)
 
     print('Starting backtest on', argv[0])
 

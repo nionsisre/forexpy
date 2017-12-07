@@ -4,10 +4,11 @@ from logic import MarketTrend
 from logic import Indicator, validate_datapoint
 from logic.candle import Candle
 
+
 class TrailingStop(Indicator):
 
-    def __init__(self, atr_period_length = 7):
-        super(TrailingStop,self).__init__()
+    def __init__(self, atr_period_length=7):
+        super(TrailingStop, self).__init__()
         self.period = atr_period_length
         self._high = []
         self._low = []
@@ -61,7 +62,6 @@ class TrailingStop(Indicator):
                     self.state = MarketTrend.STOP_SHORT
                     self.trading_enabled = False
 
-
     def update(self, datapoint):
 
         if not isinstance(datapoint, Candle):
@@ -72,7 +72,7 @@ class TrailingStop(Indicator):
         self._low.append(datapoint.low)
         self._close.append(datapoint.close)
 
-        if (len(self._high)>self.period):
+        if (len(self._high) > self.period):
             self._close.pop(0)
             self._low.pop(0)
             self._high.pop(0)
@@ -80,8 +80,9 @@ class TrailingStop(Indicator):
         if self.trading_enabled:
             self.current_stop_price = self.GetPrice(self.position_type)
 
-    def SetStop(self, position_type = MarketTrend.ENTER_LONG):
-        if (position_type != MarketTrend.ENTER_LONG and position_type != MarketTrend.ENTER_SHORT):
+    def SetStop(self, position_type=MarketTrend.ENTER_LONG):
+        if (position_type != MarketTrend.ENTER_LONG and
+                position_type != MarketTrend.ENTER_SHORT):
             return
         self.peak_price = self._close[-1]
         self.position_type = position_type
@@ -89,18 +90,18 @@ class TrailingStop(Indicator):
         self.state = MarketTrend.NO_STOP
         self.trading_enabled = True
 
-    def GetPrice(self, position_type = MarketTrend.ENTER_LONG):
+    def GetPrice(self, position_type=MarketTrend.ENTER_LONG):
         if not self.seen_enough_data():
             return numpy.nan
 
         high = numpy.array(self._high, dtype=float)
         low = numpy.array(self._low, dtype=float)
         close = numpy.array(self._close, dtype=float)
-        ATR = talib.ATR(high, low, close, timeperiod=self.period-1)[-1]
+        ATR = talib.ATR(high, low, close, timeperiod=self.period - 1)[-1]
 
-        if ( position_type == MarketTrend.ENTER_LONG ):
+        if (position_type == MarketTrend.ENTER_LONG):
             stop_price = self.peak_price - 1.1 * ATR
-        elif ( position_type == MarketTrend.ENTER_SHORT ):
+        elif (position_type == MarketTrend.ENTER_SHORT):
             stop_price = self.peak_price + 1.1 * ATR
         else:
             stop_price = numpy.nan

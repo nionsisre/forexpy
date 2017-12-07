@@ -11,23 +11,20 @@ from exchange.oanda import Oanda
 from exchange.oanda import OandaExceptionCode
 from logic.strategy import Strategy
 
+logging.basicConfig(
+    filename='OANDAbot.log',
+    level=logging.INFO,
+    format="%(asctime)-15s %(message)s")
 
-logging.basicConfig(filename='OANDAbot.log',
-                    level=logging.INFO,
-                    format="%(asctime)-15s %(message)s")
-
-OANDA = Oanda(ACCESS_TOKEN,
-              ACCOUNT_ID,
-              INSTRUMENT,
-              ACCOUNT_CURRENCY,
+OANDA = Oanda(ACCESS_TOKEN, ACCOUNT_ID, INSTRUMENT, ACCOUNT_CURRENCY,
               HOME_BASE_CURRENCY_PAIR,
-              HOME_BASE_CURRENCY_PAIR_DEFAULT_EXCHANGE_RATE,
-              ENVIRONMENT)
+              HOME_BASE_CURRENCY_PAIR_DEFAULT_EXCHANGE_RATE, ENVIRONMENT)
 
-STRATEGY = Strategy(OANDA,
-                    CANDLES_MINUTES,
-                    risk=MAX_PERCENTAGE_ACCOUNT_AT_RISK,
-                    stoploss=STOP_LOSS)
+STRATEGY = Strategy(
+    OANDA,
+    CANDLES_MINUTES,
+    risk=MAX_PERCENTAGE_ACCOUNT_AT_RISK,
+    stoploss=STOP_LOSS)
 
 CURSED_UI = CursedUI(OANDA, STRATEGY, INSTRUMENT, ACCOUNT_CURRENCY)
 

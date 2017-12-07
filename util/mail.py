@@ -5,7 +5,9 @@ import datetime
 
 
 class Email(object):
-    def __init__(self, email_from, email_to, email_server, email_port, email_password, bot_name):
+
+    def __init__(self, email_from, email_to, email_server, email_port,
+                 email_password, bot_name):
         self.email_from = email_from
         self.email_to = email_to
         self.email_server = email_server

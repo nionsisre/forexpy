@@ -17,6 +17,7 @@ INSTRUMENT = 'INSTR'
 
 
 class OandaBacktest(object):
+
     def __init__(self, in_filename, leverage=20.0, account_value=10000.0):
         self.leverage = leverage
         self.net_worth = account_value
@@ -64,10 +65,9 @@ class OandaBacktest(object):
         self.file = None
         self.pbar.close()
         longwons = float('{0:.2f}'.format(self.won_longs / self.longs * 100))
-        shortwons = float('{0:.2f}'.format(
-            self.won_shorts / self.shorts * 100))
-        print('Total PnL: ' + '{0:.2f}'.format(self.total_pnl) + ' NetWorth: '
-              + '{0:.2f}'.format(self.get_net_worth()))
+        shortwons = float('{0:.2f}'.format(self.won_shorts / self.shorts * 100))
+        print('Total PnL: ' + '{0:.2f}'.format(self.total_pnl) + ' NetWorth: ' +
+              '{0:.2f}'.format(self.get_net_worth()))
         print('Longs: {} ({}% won)'.format(self.longs, longwons))
         print('Shorts: {} ({}% won)'.format(self.shorts, shortwons))
 
@@ -142,8 +142,7 @@ class OandaBacktest(object):
                 self.won_shorts += 1
 
         logging_str = 'Trade closed (' + str(
-            datetime.fromtimestamp(
-                self.last_update_timestamp)) + '): '
+            datetime.fromtimestamp(self.last_update_timestamp)) + '): '
         logging_str += str(self.position_side)
         logging_str += ' from: ' + str(self.last_entered_price)
         logging_str += ' to: ' + str(self.current_price)
@@ -237,7 +236,8 @@ class OandaBacktest(object):
             microsecond = 0
         else:
             microsecond = int(microsecond)
-        return datetime(year, month, day, hour, minute, second, microsecond).timestamp()
+        return datetime(year, month, day, hour, minute, second,
+                        microsecond).timestamp()
 
     def update_subscribers(self):
         # get a line

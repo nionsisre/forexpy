@@ -3,6 +3,7 @@ from logic import validate_datapoint
 
 
 class CursedUI(object):
+
     def __init__(self, oanda, strategy, instrument, account_currency):
         self._oanda = oanda
         self._strategy = strategy
@@ -94,8 +95,8 @@ class CursedUI(object):
 
         # c - close open position
         if char == ord('c'):
-            self.stdscr.addstr(
-                18, 22, "(now: closing positions)", curses.A_STANDOUT)
+            self.stdscr.addstr(18, 22, "(now: closing positions)",
+                               curses.A_STANDOUT)
             self.stdscr.refresh()
             tstatus = self._strategy.TradingStatus()
             self._strategy.ResumeTrading()
@@ -104,15 +105,15 @@ class CursedUI(object):
 
         # p - pause strategy
         if char == ord('p'):
-            self.stdscr.addstr(
-                18, 22, "(now: pausing strategy)", curses.A_STANDOUT)
+            self.stdscr.addstr(18, 22, "(now: pausing strategy)",
+                               curses.A_STANDOUT)
             self.stdscr.refresh()
             self._strategy.PauseTrading()
 
         # r - resume strategy
         if char == ord('r'):
-            self.stdscr.addstr(
-                18, 22, "(now: resuming strategy)", curses.A_STANDOUT)
+            self.stdscr.addstr(18, 22, "(now: resuming strategy)",
+                               curses.A_STANDOUT)
             self.stdscr.refresh()
             self._strategy.ResumeTrading()
 
@@ -137,8 +138,8 @@ class CursedUI(object):
         self.stdscr.addstr(0, 0, "OANDA bot", curses.A_UNDERLINE)
 
         # Current account status
-        self.stdscr.addstr(2, 0, "Account currency:   " +
-                           self._account_currency)
+        self.stdscr.addstr(2, 0,
+                           "Account currency:   " + self._account_currency)
         self.stdscr.addstr(3, 0, "Trading instrument: " + self._instrument)
 
         # Ticker and heartbeat
@@ -146,21 +147,21 @@ class CursedUI(object):
         self.stdscr.addstr(6, 0, "Ticker:    " + str(self._current_price))
 
         # Account status
-        self.stdscr.addstr(8, 0, "Position:        " +
-                           self._current_position + " " + self._s)
+        self.stdscr.addstr(
+            8, 0, "Position:        " + self._current_position + " " + self._s)
         self.stdscr.addstr(9, 0, "Balance:         " + self._balance)
         self.stdscr.addstr(10, 0, "Available units: " + self._u)
-        self.stdscr.addstr(11, 0, "Cash invested:   " +
-                           self._i + " leverage: " + self._leverage)
-        self.stdscr.addstr(12, 0, "Net Worth:       " +
-                           self._net_worth + " unrealized PnL: " +
-                           self._unrealized_pnl)
+        self.stdscr.addstr(
+            11, 0,
+            "Cash invested:   " + self._i + " leverage: " + self._leverage)
+        self.stdscr.addstr(12, 0, "Net Worth:       " + self._net_worth +
+                           " unrealized PnL: " + self._unrealized_pnl)
 
         # Strategy status
-        self.stdscr.addstr(14, 0, "stop Loss price:     " +
-                           str(self._stoploss_price))
-        self.stdscr.addstr(15, 0, "Trailing stop price: " +
-                           str(self._trailingstop_price))
+        self.stdscr.addstr(14, 0,
+                           "stop Loss price:     " + str(self._stoploss_price))
+        self.stdscr.addstr(
+            15, 0, "Trailing stop price: " + str(self._trailingstop_price))
         if self._strategy.TradingStatus():
             status = "running"
         else:

@@ -1,10 +1,11 @@
 __all__ = [
-    "candle", "strategy", "heikinashi", "movingaverage", "risk",
-    "trailingstop", "timestop", "takeprofit"
+    "candle", "strategy", "heikinashi", "movingaverage", "risk", "trailingstop",
+    "timestop", "takeprofit"
 ]
 
 
 class Indicator(object):
+
     def update(self, datapoint):
         pass
 
@@ -31,6 +32,7 @@ class MarketTrend(object):
 
 
 class TrendEstimator(object):
+
     def __init__(self, config):
         self.config = config
         self.trend = MarketTrend.NONE
@@ -47,7 +49,6 @@ class TrendEstimator(object):
     # And return True when the estimator seen enough data and can function
     def seen_enough_data(self):
         return False
-
 
     # Return the current market trend state
     # If uncertain, return MarketTrend.NONE,

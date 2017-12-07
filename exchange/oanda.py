@@ -13,6 +13,7 @@ from util.watchdog import WatchDog
 
 
 class OandaPriceStreamer(oandapy.Streamer):
+
     def __init__(self, environment, api_key, account_id, instrument):
         self._api_key = api_key
         self._account_id = account_id
@@ -112,6 +113,7 @@ class OandaPriceStreamer(oandapy.Streamer):
 
 
 class Oanda(object):
+
     def __init__(self,
                  api_key,
                  account_id,
@@ -249,9 +251,8 @@ class Oanda(object):
         exchange_rate = self._home_base_default_exchange_rate
         response = self._oanda.get_prices(
             self._account_id, instruments=self._home_base_pair)
-        exchange_rate = (
-            float(response['prices'][0]['bids'][0]['price']) +
-            float(response['prices'][0]['asks'][0]['price'])) / 2.0
+        exchange_rate = (float(response['prices'][0]['bids'][0]['price']) +
+                         float(response['prices'][0]['asks'][0]['price'])) / 2.0
 
         try:
             response = self._oanda.get_account(self._account_id)

@@ -43,8 +43,8 @@ class Candle(Indicator):
         if _current_timestamp >= self.close_time:
             self._is_closed = True
 
-        if (_current_timestamp <= self.close_time
-                and _current_timestamp >= self.open_time):
+        if (_current_timestamp <= self.close_time and
+                _current_timestamp >= self.open_time):
             self._update_data(_price)
 
     def _reset_price(self, price):

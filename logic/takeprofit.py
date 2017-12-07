@@ -7,8 +7,8 @@ from logic.candle import Candle
 
 class TakeProfit(Indicator):
 
-    def __init__(self, atr_period_length = 7):
-        super(TakeProfit,self).__init__()
+    def __init__(self, atr_period_length=7):
+        super(TakeProfit, self).__init__()
         self.period = atr_period_length
         self._high = []
         self._low = []
@@ -53,13 +53,14 @@ class TakeProfit(Indicator):
         self._low.append(datapoint.low)
         self._close.append(datapoint.close)
 
-        if (len(self._high)>self.period):
+        if (len(self._high) > self.period):
             self._close.pop(0)
             self._low.pop(0)
             self._high.pop(0)
 
-    def SetTakeProfit(self, price, position_type = MarketTrend.ENTER_LONG):
-        if (position_type != MarketTrend.ENTER_LONG and position_type != MarketTrend.ENTER_SHORT):
+    def SetTakeProfit(self, price, position_type=MarketTrend.ENTER_LONG):
+        if (position_type != MarketTrend.ENTER_LONG and
+                position_type != MarketTrend.ENTER_SHORT):
             return
         if (price <= 0.0):
             return
@@ -67,7 +68,7 @@ class TakeProfit(Indicator):
         self.current_takeprofit_price = price
         self.state = MarketTrend.NO_STOP
 
-    def GetPrice(self, position_type = MarketTrend.ENTER_LONG):
+    def GetPrice(self, position_type=MarketTrend.ENTER_LONG):
 
         if (not self.seen_enough_data()):
             return numpy.nan
@@ -75,13 +76,13 @@ class TakeProfit(Indicator):
         high = numpy.array(self._high, dtype=float)
         low = numpy.array(self._low, dtype=float)
         close = numpy.array(self._close, dtype=float)
-        ATR = talib.ATR(high, low, close, timeperiod=self.period-1)[-1]
+        ATR = talib.ATR(high, low, close, timeperiod=self.period - 1)[-1]
         takeprofit_price = self._close[-1]
 
-        if ( position_type == MarketTrend.ENTER_LONG ):
-            takeprofit_price += 1.0*ATR
-        elif ( position_type == MarketTrend.ENTER_SHORT ):
-            takeprofit_price -= 1.0*ATR
+        if (position_type == MarketTrend.ENTER_LONG):
+            takeprofit_price += 1.0 * ATR
+        elif (position_type == MarketTrend.ENTER_SHORT):
+            takeprofit_price -= 1.0 * ATR
         else:
             takeprofit_price = numpy.nan
 
