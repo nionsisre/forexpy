@@ -197,7 +197,7 @@ class Strategy(object):
             return
 
         try:
-            self._oanda.Buy(units)
+            self._oanda.buy(units)
         except Exception as e:
             self._catchTradeException(e, "enter long")
 
@@ -217,7 +217,7 @@ class Strategy(object):
             return
 
         try:
-            self._oanda.Sell(units)
+            self._oanda.sell(units)
         except Exception as e:
             self._catchTradeException(e, "enter short")
 
@@ -229,7 +229,7 @@ class Strategy(object):
             return
 
         try:
-            self._oanda.ClosePosition(position)
+            self._oanda.close_position(position)
         except Exception as e:
             self._catchTradeException(e, "close")
 
