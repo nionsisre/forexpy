@@ -1,18 +1,12 @@
-import datetime
-import time
-from exchange.oanda import Oanda
+from datetime import timedelta
 from logic.candle import Candle
 from logic import movingaverage
 from logic import MarketTrend
-from logic.stoploss import StopLoss
 from logic.trailingstop import TrailingStop
 from logic.takeprofit import TakeProfit
 from logic.risk import RiskManager
 from logic.timestop import TimeStop
-import logging
 import traceback
-import numpy
-import talib
 
 
 class Strategy(object):
@@ -52,7 +46,6 @@ class Strategy(object):
         self.trading_enabled = False
 
     def Start(self):
-        logging.info("Starting strategy")
         # Prefeed the strategy with historic candles
         candle_count = self._long_sma.AmountOfDataStillMissing() + 1
         self._oanda.start_price_streaming()
@@ -66,11 +59,9 @@ class Strategy(object):
         self.trading_enabled = True
 
     def PauseTrading(self):
-        logging.info("Pausing strategy")
         self.trading_enabled = False
 
     def ResumeTrading(self):
-        logging.info("Resuming strategy")
         self.trading_enabled = True
 
     def TradingStatus(self):
@@ -80,7 +71,6 @@ class Strategy(object):
         self.trading_enabled = tstatus
 
     def stop(self):
-        logging.info("Stop strategy")
         self.SetTradingStatus(False)
         self._oanda.StopPriceStreaming()
 
@@ -89,11 +79,8 @@ class Strategy(object):
             if not self._current_candle or self._current_candle.seen_enough_data(
             ):
                 openTime = datapoint["now"]
-                closeTime = datetime.datetime.fromtimestamp(
-                    datapoint["now"]) + datetime.timedelta(
-                        minutes=self._candle_size)
-                closeTime = time.mktime(
-                    closeTime.timetuple()) + closeTime.microsecond * 0.000001
+                closeTime = datapoint["now"] + timedelta(
+                    minutes=self._candle_size)
                 self._current_candle = Candle(openTime, closeTime)
                 self._current_candle.update(datapoint)
             else:
@@ -110,8 +97,6 @@ class Strategy(object):
         _state = self._timestop.GetState()
         if _state == MarketTrend.STOP_LONG or _state == MarketTrend.STOP_SHORT:
             if (self._oanda.current_position() != 0):
-                logging.info("Timing Stop fired, TGIF!: " + str(_state) +
-                             " price: " + str(self._logging_current_price))
                 self.ClosePosition('short')
                 self.ClosePosition('long')
                 return
@@ -139,8 +124,6 @@ class Strategy(object):
         if sl == MarketTrend.STOP_LONG or sl == MarketTrend.STOP_SHORT:
             if self._oanda.current_position() != 0:
                 self.ClosePosition('both')
-                logging.info(
-                    "STOP called @ " + str(self._logging_current_price))
                 self._sl_indicator.CancelStop()
                 return
 
@@ -148,14 +131,12 @@ class Strategy(object):
         if tp == MarketTrend.STOP_LONG or tp == MarketTrend.STOP_SHORT:
             if self._oanda.current_position() != 0:
                 self.ClosePosition('both')
-                logging.info(
-                    "TAKE PROFIT called @ " + str(self._logging_current_price))
                 self._tp_indicator.CancelTakeProfit()
                 return
 
         if self._previous_cross[0] == False and self._current_cross[0] == True:
-            if self._oanda.current_position() != 0 and self._oanda.current_side(
-            ) == MarketTrend.ENTER_LONG:
+            if self._oanda.current_position(
+            ) != 0 and self._oanda.current_side() == MarketTrend.ENTER_LONG:
                 return
             else:
                 self.ClosePosition('short')
@@ -166,8 +147,8 @@ class Strategy(object):
                 self.Buy()
 
         if self._previous_cross[1] == False and self._current_cross[1] == True:
-            if self._oanda.current_position() != 0 and self._oanda.current_side(
-            ) == MarketTrend.ENTER_SHORT:
+            if self._oanda.current_position(
+            ) != 0 and self._oanda.current_side() == MarketTrend.ENTER_SHORT:
                 return
             else:
                 self.ClosePosition('long')
@@ -183,17 +164,12 @@ class Strategy(object):
         return [buycross, sellcross]
 
     def Buy(self):
-        logging.info("Strategy Buy() called. Going long @ " +
-                     str(self._logging_current_price))
-
         if not self.trading_enabled:
-            logging.info("Strategy trading disabled, doing nothing")
             return
 
         # Enter the long position on the instrument
         units = self._risk.GetLongPositionSize()
         if units == 0:
-            logging.info("Cant trade zero units, doing nothing")
             return
 
         try:
@@ -202,18 +178,12 @@ class Strategy(object):
             self._catchTradeException(e, "enter long")
 
     def Sell(self):
-        logging.info("Strategy Sell() called. Going short @ " +
-                     str(self._logging_current_price))
         if not self.trading_enabled:
-            logging.info("Trading disabled, doing nothing")
             return
 
         # Enter the short position on the instrument
         units = self._risk.GetShortPositionSize()
-        logging.info(
-            "Got the number of units to trade from RiskManager: " + str(units))
         if units == 0:
-            logging.info("Cant trade 0 units, doing nothing")
             return
 
         try:
@@ -222,10 +192,8 @@ class Strategy(object):
             self._catchTradeException(e, "enter short")
 
     def ClosePosition(self, position):
-        logging.info("Closing %s position, and all stops" % position)
         self._sl_indicator.CancelStop()
         if not self.trading_enabled:
-            logging.info("Trading disabled, doing nothing")
             return
 
         try:
@@ -243,8 +211,6 @@ class Strategy(object):
         return self._sl_indicator.GetPrice()
 
     def _catchTradeException(self, e, position):
-        logging.critical("Failed to " + position + " position")
-        logging.critical(traceback.format_exc())
         if self._email:
             txt = "\n\nError while trying to " + position + " position\n"
             txt += "It was caught, I should still be running\n\n"

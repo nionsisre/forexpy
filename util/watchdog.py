@@ -6,8 +6,6 @@ class WatchDog(object):
 
     @staticmethod
     def Callback(event):
-        import logging
-        logging.info("callback")
         event.set()
 
     def __init__(self):
