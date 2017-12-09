@@ -56,7 +56,8 @@ class OandaBacktest(object):
 
     def start_price_streaming(self):
         file_size = os.stat(self.in_filename).st_size
-        self.pbar = tqdm(total=file_size)
+        self.pbar = tqdm(total=file_size, leave=False, mininterval=1,
+                         ascii=True)
         self.file = open(self.in_filename, 'r')
 
     def stop_price_streaming(self):
