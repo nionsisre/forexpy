@@ -9,6 +9,7 @@ from logic.candle import Candle
 
 logging.basicConfig(
     filename='backtest.log',
+    filemode='w',
     level=logging.INFO,
     format='%(asctime)-15s %(message)s')
 
