@@ -201,8 +201,8 @@ class EndpointsMixin(object):
 
 
 class API(EndpointsMixin, object):
-
-    def __init__(self, environment="practice", access_token=None, headers=None):
+    def __init__(self, environment="practice", access_token=None,
+                 headers=None):
         """Instantiates an instance of OandaPy's API wrapper
         :param environment: (optional) Provide the environment for oanda's \
           REST api, either 'sandbox', 'practice', or 'live'. Default: practice
@@ -221,7 +221,8 @@ class API(EndpointsMixin, object):
         self.client = requests.Session()
 
         if self.access_token:
-            self.client.headers['Authorization'] = 'Bearer ' + self.access_token
+            self.client.headers[
+                'Authorization'] = 'Bearer ' + self.access_token
 
         if headers:
             self.client.headers.update(headers)
@@ -299,7 +300,8 @@ class Streamer():
         self.connected = False
 
         if self.access_token:
-            self.client.headers['Authorization'] = 'Bearer ' + self.access_token
+            self.client.headers[
+                'Authorization'] = 'Bearer ' + self.access_token
 
     def start(self, ignore_heartbeat=True, **params):
         """ Starts the stream with the given parameters
@@ -350,7 +352,6 @@ class Streamer():
 
 
 class OandaError(Exception):
-
     def __init__(self, error_response):
         msg = "OANDA API returned error: %s " % error_response
         logging.error(msg)

@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 
 class Strategyplot:
-
     def __init__(self, debug_data, subplots_no):
         self.debug_data = debug_data
         self.figure, self.subplots = plt.subplots(subplots_no, 1, sharex=True)

@@ -3,7 +3,6 @@ from logic import validate_datapoint
 
 
 class CursedUI(object):
-
     def __init__(self, oanda, strategy, instrument, account_currency):
         self._oanda = oanda
         self._strategy = strategy

@@ -6,7 +6,6 @@ import unittest
 
 
 class TestOanda(unittest.TestCase):
-
     def setUp(self):
         self.oa = Oanda(ACCESS_TOKEN, ACCOUNT_ID, INSTRUMENT, ACCOUNT_CURRENCY,
                         ENVIRONMENT)

@@ -36,7 +36,6 @@ def GetDataPointValue(datapoint):
 
 # Base class for real indicators (SimpleMovingAverage, ExponentialMovingAverage)
 class MovingAverage(Indicator):
-
     def __init__(self, period_count=1):
         self.value = 0.0
         self.period_count = period_count
@@ -57,7 +56,6 @@ class MovingAverage(Indicator):
 
 # Moving average of a price over a period of time
 class SimpleMovingAverage(MovingAverage):
-
     def __init__(self, period_count=1):
         super(SimpleMovingAverage, self).__init__(period_count)
 
@@ -85,7 +83,6 @@ class SimpleMovingAverage(MovingAverage):
 
 # Moving average with exponential smoothing of a price over a period of time
 class ExponentialMovingAverage(MovingAverage):
-
     def __init__(self, period_count=1):
         super(ExponentialMovingAverage, self).__init__(period_count)
 

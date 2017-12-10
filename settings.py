@@ -20,9 +20,9 @@ CANDLES_MINUTES = 1
 
 # Risk settings
 MAX_PERCENTAGE_ACCOUNT_AT_RISK = 2  # percent
-STOP_LOSS = 1
+STOP_LOSS = 2
 TRAILING_PERIOD = 5
-TAKE_PROFIT = 0.0020
+TAKE_PROFIT = 1
 
 # Email credentials
 EMAIL_RECIPIENT = "youremail@gmail.com"

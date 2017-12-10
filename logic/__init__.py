@@ -1,11 +1,10 @@
 __all__ = [
-    "candle", "strategy", "heikinashi", "movingaverage", "risk", "trailingstop",
-    "timestop", "takeprofit"
+    "candle", "strategy", "heikinashi", "movingaverage", "risk",
+    "trailingstop", "timestop", "takeprofit"
 ]
 
 
 class Indicator(object):
-
     def update(self, datapoint):
         pass
 
@@ -32,7 +31,6 @@ class MarketTrend(object):
 
 
 class TrendEstimator(object):
-
     def __init__(self, config):
         self.config = config
         self.trend = MarketTrend.NONE
