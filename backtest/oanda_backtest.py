@@ -11,6 +11,7 @@ INSTRUMENT = 'INSTR'
 
 class OandaBacktest(object):
     def __init__(self, leverage=20.0, account_value=10000.0):
+        self.is_running = True
         self.leverage = leverage
         self.net_worth = account_value
         self.ticker_subscribers = []
@@ -49,6 +50,7 @@ class OandaBacktest(object):
             total=self.db.size, leave=False, ascii=True)
 
     def stop_price_streaming(self):
+        self.is_running = False
         self.db.close()
         self.pbar.close()
         longwons = float('{0:.2f}'.format(self.won_longs / self.longs * 100))
@@ -177,9 +179,6 @@ class OandaBacktest(object):
             candle.update(datapoint)
         return candle
 
-    def is_running(self):
-        return self.db.is_running()
-
     def get_next_line(self):
         tick = self.db.fetchone()
 
@@ -201,18 +200,17 @@ class OandaBacktest(object):
         return price, datapoint
 
     def update_subscribers(self):
-        price, datapoint = self.get_next_line()
+        try:
+            price, datapoint = self.get_next_line()
+        except TypeError:
+            return
+
         self.last_update_timestamp = datapoint['now']
         self.current_price = price
 
         # push to all subscribers
         for obj in self.ticker_subscribers:
             obj.update(datapoint)
-            # For plotting stops
-            self._create_plot_record('StopLoss', obj.GetStopLossPrice())
-            self._create_plot_record('TrailingStop',
-                                     obj.GetTrailingStopPrice())
-            self._create_plot_record('TakeProfit', obj.GetTakeProfitPrice())
 
         self._create_plot_record('RawPrice')
         self._create_plot_record('NetWorth', self.get_net_worth())

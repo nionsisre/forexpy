@@ -21,9 +21,6 @@ def plot_results(plot_data):
     splot.plot("Sell", 0, "ro")
     splot.plot("Buy", 0, "g^")
     splot.plot("Close", 0, "b*")
-   #splot.plot("StopLoss", 0, "_")
-   #splot.plot("TrailingStop", 0, "g-")
-   #splot.plot("TakeProfit", 0, "g-")
     splot.plot("short", 0, "r--")
     splot.plot("medium", 0, "g--")
     splot.plot("long", 0, "b--")
@@ -48,7 +45,7 @@ def main(argv):
 
     strategy.Start()
 
-    while oanda_backtest.is_running():
+    while oanda_backtest.is_running:
         oanda_backtest.update_subscribers()
 
     #print('plotting results...')

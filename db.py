@@ -14,9 +14,6 @@ class Database:
         self.cur.close()
         self.conn.close()
 
-    def is_running(self):
-        return len(self.array) > 0
-
     def fetchone(self):
         try:
             return self.array.pop()
