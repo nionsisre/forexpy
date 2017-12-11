@@ -6,6 +6,7 @@ from logic.candle import Candle
 
 
 class TakeProfit(Indicator):
+
     def __init__(self, atr_period_length=7):
         super(TakeProfit, self).__init__()
         self.period = atr_period_length
@@ -58,8 +59,8 @@ class TakeProfit(Indicator):
             self._high.pop(0)
 
     def SetTakeProfit(self, price, position_type=MarketTrend.ENTER_LONG):
-        if (position_type != MarketTrend.ENTER_LONG
-                and position_type != MarketTrend.ENTER_SHORT):
+        if (position_type != MarketTrend.ENTER_LONG and
+                position_type != MarketTrend.ENTER_SHORT):
             return
         if (price <= 0.0):
             return

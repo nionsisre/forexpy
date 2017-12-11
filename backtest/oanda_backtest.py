@@ -46,7 +46,8 @@ class OandaBacktest(object):
 
     def start_price_streaming(self):
         self.db = db.Database()
-        self.pbar = tqdm(total=self.db.size, leave=False, ascii=True)
+        self.pbar = tqdm(
+            total=self.db.size, leave=False, ascii=True)
 
     def stop_price_streaming(self):
         self.is_running = False

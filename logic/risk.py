@@ -3,6 +3,7 @@ from math import floor
 
 
 class RiskManager(object):
+
     def __init__(self, oanda, account_percent_at_risk=2):
         self._oanda = oanda
         self._risk = account_percent_at_risk / 100.0

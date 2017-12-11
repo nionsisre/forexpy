@@ -3,6 +3,7 @@ from logic.candle import Candle
 
 
 class HeikinAshi(Indicator):
+
     def __init__(self):
         self.open = 0.0
         self.close = 0.0

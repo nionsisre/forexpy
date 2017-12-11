@@ -6,6 +6,7 @@ from logic.candle import Candle
 
 # Sets its state to STOP if the datapoint's time is in a specified range
 class TimeStop(Indicator):
+
     def __init__(self):
         self._state = MarketTrend.NO_STOP
 

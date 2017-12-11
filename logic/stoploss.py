@@ -6,6 +6,7 @@ from logic.candle import Candle
 
 
 class StopLoss(Indicator):
+
     def __init__(self, atr_period_length=14):
         super(StopLoss, self).__init__()
         self.period = atr_period_length
@@ -57,8 +58,8 @@ class StopLoss(Indicator):
             self._high.pop(0)
 
     def SetStop(self, price, position_type=MarketTrend.ENTER_LONG):
-        if (position_type != MarketTrend.ENTER_LONG
-                and position_type != MarketTrend.ENTER_SHORT):
+        if (position_type != MarketTrend.ENTER_LONG and
+                position_type != MarketTrend.ENTER_SHORT):
             return
         if (price <= 0.0):
             return

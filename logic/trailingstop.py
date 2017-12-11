@@ -6,6 +6,7 @@ from logic.candle import Candle
 
 
 class TrailingStop(Indicator):
+
     def __init__(self, atr_period_length=7):
         super(TrailingStop, self).__init__()
         self.period = atr_period_length
@@ -46,8 +47,7 @@ class TrailingStop(Indicator):
         if (self.position_type == MarketTrend.ENTER_SHORT):
             if datapoint["value"] < self.peak_price:
                 self.peak_price = datapoint["value"]
-                self.current_stop_price = self.GetPrice(
-                    MarketTrend.ENTER_SHORT)
+                self.current_stop_price = self.GetPrice(MarketTrend.ENTER_SHORT)
 
         # Check if it is time to do a stop trade
         if (self.current_stop_price > 0.0):
@@ -81,8 +81,8 @@ class TrailingStop(Indicator):
             self.current_stop_price = self.GetPrice(self.position_type)
 
     def SetStop(self, position_type=MarketTrend.ENTER_LONG):
-        if (position_type != MarketTrend.ENTER_LONG
-                and position_type != MarketTrend.ENTER_SHORT):
+        if (position_type != MarketTrend.ENTER_LONG and
+                position_type != MarketTrend.ENTER_SHORT):
             return
         self.peak_price = self._close[-1]
         self.position_type = position_type

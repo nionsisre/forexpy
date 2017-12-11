@@ -6,6 +6,7 @@ from logic.candle import Candle
 
 
 class ChandelierExit(Indicator):
+
     def __init__(self):
         super(ChandelierExit, self).__init__()
         self.enter_period = 22

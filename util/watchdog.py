@@ -3,6 +3,7 @@ from threading import Timer, Event
 
 
 class WatchDog(object):
+
     @staticmethod
     def Callback(event):
         event.set()
