@@ -1,19 +1,30 @@
+from datetime import datetime, timedelta
+import time
 import math
-import db
-from datetime import timedelta
+import os
+import logging
 from tqdm import tqdm
 from logic import MarketTrend
 from logic.candle import Candle
+
+logging.basicConfig(
+    filename='backtest.log',
+    filemode='w',
+    level=logging.INFO,
+    format='%(asctime)-15s %(message)s')
 
 HOME_CURRENCY = 'HOME'
 INSTRUMENT = 'INSTR'
 
 
 class OandaBacktest(object):
-    def __init__(self, leverage=20.0, account_value=10000.0):
+
+    def __init__(self, in_filename, leverage=20.0, account_value=10000.0):
         self.leverage = leverage
         self.net_worth = account_value
         self.ticker_subscribers = []
+        self.file = None
+        self.in_filename = in_filename
         self.position = 0
         self.position_side = MarketTrend.NONE
         self.cash_invested = 0.0
@@ -44,18 +55,21 @@ class OandaBacktest(object):
         self.ticker_subscribers.append(obj)
 
     def start_price_streaming(self):
-        self.db = db.Database()
-        self.pbar = tqdm(
-            total=self.db.size, leave=False, ascii=True)
+        file_size = os.stat(self.in_filename).st_size
+        self.pbar = tqdm(total=file_size, leave=False, mininterval=1,
+                         ascii=True)
+        self.file = open(self.in_filename, 'r')
 
     def stop_price_streaming(self):
-        self.db.close()
+        if not self.file:
+            return
+        self.file.close()
+        self.file = None
         self.pbar.close()
         longwons = float('{0:.2f}'.format(self.won_longs / self.longs * 100))
-        shortwons = float('{0:.2f}'.format(
-            self.won_shorts / self.shorts * 100))
-        print('Total PnL: ' + '{0:.2f}'.format(self.total_pnl) +
-              ' NetWorth: ' + '{0:.2f}'.format(self.get_net_worth()))
+        shortwons = float('{0:.2f}'.format(self.won_shorts / self.shorts * 100))
+        print('Total PnL: ' + '{0:.2f}'.format(self.total_pnl) + ' NetWorth: ' +
+              '{0:.2f}'.format(self.get_net_worth()))
         print('Longs: {} ({}% won)'.format(self.longs, longwons))
         print('Shorts: {} ({}% won)'.format(self.shorts, shortwons))
 
@@ -129,6 +143,15 @@ class OandaBacktest(object):
             if realized_pnl >= 0:
                 self.won_shorts += 1
 
+        logging_str = 'Trade closed (' + str(
+            datetime.fromtimestamp(self.last_update_timestamp)) + '): '
+        logging_str += str(self.position_side)
+        logging_str += ' from: ' + str(self.last_entered_price)
+        logging_str += ' to: ' + str(self.current_price)
+        logging_str += '. Realized PnL: ' + str(realized_pnl)
+        logging_str += ' NetWorth: ' + str(self.get_net_worth())
+        logging.info(logging_str)
+
         self.position_side = MarketTrend.NONE
 
         self.total_pnl += realized_pnl
@@ -169,7 +192,10 @@ class OandaBacktest(object):
     def get_candle(self, candle_size):
         _, datapoint = self.get_next_line()
         open_time = datapoint['now']
-        close_time = datapoint['now'] + timedelta(minutes=candle_size)
+        close_time = datetime.fromtimestamp(
+            datapoint['now']) + timedelta(minutes=candle_size)
+        close_time = time.mktime(close_time.timetuple()) + \
+            close_time.microsecond * 0.000001
         candle = Candle(open_time, close_time)
         candle.update(datapoint)
         while not candle.seen_enough_data():
@@ -178,30 +204,53 @@ class OandaBacktest(object):
         return candle
 
     def is_running(self):
-        return self.db.is_running()
+        return self.file is not None
 
     def get_next_line(self):
-        tick = self.db.fetchone()
-
-        if tick is None:
-            self.stop_price_streaming()
+        if not self.file:
             return
+        line = self.file.readline()
+        self.pbar.update(len(line))
+        if not line:
+            self.stop_price_streaming()
 
-        self.pbar.update(1)
+        date, bid, _, _, _ = line.split(',')
 
-        time = tick[0]
-        bid = tick[1]
         price = float(bid)
+        timestamp = self.parseTime(date)
 
         # form a ticker
         datapoint = {}
-        datapoint['now'] = time
+        datapoint['now'] = timestamp
         datapoint['value'] = price
 
         return price, datapoint
 
+    def parseTime(self, input_date):
+        year = int(input_date[:4])
+        month = int(input_date[5:7])
+        day = int(input_date[8:10])
+        hour = int(input_date[11:13])
+        minute = int(input_date[14:16])
+        second = int(input_date[17:19])
+        microsecond = input_date[20:26]
+        if microsecond == '':
+            microsecond = 0
+        else:
+            microsecond = int(microsecond)
+        return datetime(year, month, day, hour, minute, second,
+                        microsecond).timestamp()
+
     def update_subscribers(self):
-        price, datapoint = self.get_next_line()
+        # get a line
+        if not self.file:
+            return
+
+        try:
+            price, datapoint = self.get_next_line()
+        except:
+            return
+
         self.last_update_timestamp = datapoint['now']
         self.current_price = price
 
@@ -210,8 +259,7 @@ class OandaBacktest(object):
             obj.update(datapoint)
             # For plotting stops
             self._create_plot_record('StopLoss', obj.GetStopLossPrice())
-            self._create_plot_record('TrailingStop',
-                                     obj.GetTrailingStopPrice())
+            self._create_plot_record('TrailingStop', obj.GetTrailingStopPrice())
             self._create_plot_record('TakeProfit', obj.GetTakeProfitPrice())
 
         self._create_plot_record('RawPrice')

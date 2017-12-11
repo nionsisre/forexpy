@@ -1,12 +1,18 @@
+import time
+
 from logic import Indicator, validate_datapoint
 
 
 class Candle(Indicator):
+
+    openp = 0.0
+    close = 0.0
+    high = 0.0
+    low = 0.0
+    open_time = time.time()
+    close_time = open_time
+
     def __init__(self, open_time, close_time):
-        self.openp = 0.0
-        self.close = 0.0
-        self.high = 0.0
-        self.low = 0.0
         self.open_time = open_time
         self.close_time = close_time
         self._is_closed = False
@@ -37,8 +43,8 @@ class Candle(Indicator):
         if _current_timestamp >= self.close_time:
             self._is_closed = True
 
-        if (_current_timestamp <= self.close_time
-                and _current_timestamp >= self.open_time):
+        if (_current_timestamp <= self.close_time and
+                _current_timestamp >= self.open_time):
             self._update_data(_price)
 
     def _reset_price(self, price):
@@ -66,8 +72,8 @@ class Candle(Indicator):
 
     def __str__(self):
         return "openp = "+str(self.openp)\
-            + " close = "+str(self.close)\
-            + " high = "+str(self.high)\
-            + " low = "+str(self.low)\
-            + " open_time = "+str(self.open_time)\
-            + " close_time = "+str(self.close_time)
+            +" close = "+str(self.close)\
+            +" high = "+str(self.high)\
+            +" low = "+str(self.low)\
+            +" open_time = "+str(self.open_time)\
+            +" close_time = "+str(self.close_time)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import traceback
+import logging
 from settings import ACCESS_TOKEN, ACCOUNT_ID, INSTRUMENT, \
     ACCOUNT_CURRENCY, HOME_BASE_CURRENCY_PAIR, \
     HOME_BASE_CURRENCY_PAIR_DEFAULT_EXCHANGE_RATE, \
@@ -9,6 +10,11 @@ from util.ui import CursedUI
 from exchange.oanda import Oanda
 from exchange.oanda import OandaExceptionCode
 from logic.strategy import Strategy
+
+logging.basicConfig(
+    filename='OANDAbot.log',
+    level=logging.INFO,
+    format="%(asctime)-15s %(message)s")
 
 OANDA = Oanda(ACCESS_TOKEN, ACCOUNT_ID, INSTRUMENT, ACCOUNT_CURRENCY,
               HOME_BASE_CURRENCY_PAIR,
@@ -26,6 +32,7 @@ CURSED_UI = CursedUI(OANDA, STRATEGY, INSTRUMENT, ACCOUNT_CURRENCY)
 def handle_exceptions(error):
     CURSED_UI.stop()
     traceback.print_exc()
+    logging.critical(traceback.format_exc())
     STRATEGY.stop()
     ret_code = OandaExceptionCode(error)
     sys.exit(ret_code)
