@@ -62,3 +62,4 @@ tick
 .vscode/tags
 
 *.pyc
+.direnv
