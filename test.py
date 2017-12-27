@@ -9,7 +9,7 @@ from docopt import docopt
 from backtest.oanda_backtest import OandaBacktest
 from logic.strategy import Strategy
 from settings import CANDLES_MINUTES, MAX_PERCENTAGE_ACCOUNT_AT_RISK,\
-    STOP_LOSS, TRAILING_PERIOD, TAKE_PROFIT
+    STOP_LOSS, TRAILING_PERIOD, TAKE_PROFIT, PLOT_RESULTS
 from util.plot import Strategyplot
 
 
@@ -18,15 +18,15 @@ def plot_results(plot_data):
         return
     splot = Strategyplot(plot_data, 2)
     splot.plot("RawPrice", 0, "m-")
-    #splot.plot("Sell", 0, "ro")
-    #splot.plot("Buy", 0, "g^")
-    #splot.plot("Close", 0, "b*")
-    #splot.plot("StopLoss", 0, "_")
+    splot.plot("Sell", 0, "ro")
+    splot.plot("Buy", 0, "g^")
+    splot.plot("Close", 0, "b*")
+    splot.plot("StopLoss", 0, "_")
     #splot.plot("TrailingStop", 0, "g-")
-    #splot.plot("TakeProfit", 0, "g-")
-    splot.plot("short", 0, "r--")
-    splot.plot("medium", 0, "g--")
-    splot.plot("long", 0, "b--")
+    splot.plot("TakeProfit", 0, "g-")
+    #splot.plot("short", 0, "r--")
+    #splot.plot("medium", 0, "g--")
+    #splot.plot("long", 0, "b--")
     #splot.plot("NetWorth", 1, "r-")
     splot.show()
 
@@ -57,9 +57,10 @@ def main(argv):
     while oanda_backtest.is_running():
         oanda_backtest.update_subscribers()
 
-    print('plotting results...')
-    plot_data = oanda_backtest.get_plot_data()
-    plot_results(plot_data)
+    if PLOT_RESULTS:
+        print('plotting results...')
+        plot_data = oanda_backtest.get_plot_data()
+        plot_results(plot_data)
 
 
 if __name__ == "__main__":

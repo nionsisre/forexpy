@@ -6,6 +6,7 @@ import logging
 from tqdm import tqdm
 from logic import MarketTrend
 from logic.candle import Candle
+from settings import PLOT_RESULTS
 
 logging.basicConfig(
     filename='backtest.log',
@@ -257,13 +258,14 @@ class OandaBacktest(object):
         # push to all subscribers
         for obj in self.ticker_subscribers:
             obj.update(datapoint)
-            # For plotting stops
-            self._create_plot_record('StopLoss', obj.GetStopLossPrice())
-            self._create_plot_record('TrailingStop', obj.GetTrailingStopPrice())
-            self._create_plot_record('TakeProfit', obj.GetTakeProfitPrice())
+            if PLOT_RESULTS:
+                self._create_plot_record('StopLoss', obj.GetStopLossPrice())
+                self._create_plot_record('TrailingStop', obj.GetTrailingStopPrice())
+                self._create_plot_record('TakeProfit', obj.GetTakeProfitPrice())
 
-        self._create_plot_record('RawPrice')
-        self._create_plot_record('NetWorth', self.get_net_worth())
+        if PLOT_RESULTS:
+            self._create_plot_record('RawPrice')
+            self._create_plot_record('NetWorth', self.get_net_worth())
 
     def get_plot_data(self):
         return self.plot_data

@@ -9,17 +9,19 @@ from logic.trailingstop import TrailingStop
 from logic.takeprofit import TakeProfit
 from logic.risk import RiskManager
 from logic.timestop import TimeStop
+from logic.macross import MACross
 import logging
 import traceback
 import numpy
 import talib
+from settings import PLOT_RESULTS
 
 
 class Strategy(object):
 
-    SHORT_EMA_PERIOD = 10
-    MEDIUM_EMA_PERIOD = 50
-    LONG_SMA_PERIOD = 100
+    SHORT_EMA_PERIOD = 7
+    MEDIUM_EMA_PERIOD = 26
+    LONG_SMA_PERIOD = 50
 
     def __init__(self,
                  oanda,
@@ -37,15 +39,11 @@ class Strategy(object):
         self._stop_loss = stoploss
         self._take_profit = take_profit
         self._email = email
-        self._short_ema = movingaverage.ExponentialMovingAverage(
-            Strategy.SHORT_EMA_PERIOD)
-        self._medium_ema = movingaverage.ExponentialMovingAverage(
-            Strategy.MEDIUM_EMA_PERIOD)
-        self._long_sma = movingaverage.SimpleMovingAverage(
-            Strategy.LONG_SMA_PERIOD)
-        self._previous_cross = [False, False]
-        self._current_cross = [False, False]
-        self._sl_indicator = TrailingStop(trailing_period)
+        self._macross = MACross(
+                Strategy.SHORT_EMA_PERIOD,
+                Strategy.MEDIUM_EMA_PERIOD,
+                Strategy.LONG_SMA_PERIOD)
+        self._sl_indicator = StopLoss(trailing_period)
         self._tp_indicator = TakeProfit()
         self._timestop = TimeStop()
         self._logging_current_price = 0.0
@@ -54,13 +52,11 @@ class Strategy(object):
     def Start(self):
         logging.info("Starting strategy")
         # Prefeed the strategy with historic candles
-        candle_count = self._long_sma.AmountOfDataStillMissing() + 1
+        candle_count = self._macross.amount_of_data_still_missing() + 1
         self._oanda.start_price_streaming()
         candles = self._oanda.get_candles(candle_count, self._candle_size)
         for c in candles:
-            self._short_ema.update(c)
-            self._medium_ema.update(c)
-            self._long_sma.update(c)
+            self._macross.update(c)
             self._sl_indicator.update(c)
             self._tp_indicator.update(c)
         self.trading_enabled = True
@@ -119,21 +115,9 @@ class Strategy(object):
         if not self._current_candle.seen_enough_data():
             return
 
-        self._short_ema.update(self._current_candle)
-
-        if self._short_ema.value < 1:
-            print(self._current_candle)
-        self._medium_ema.update(self._current_candle)
-        self._long_sma.update(self._current_candle)
+        self._macross.update(self._current_candle)
         self._sl_indicator.update(self._current_candle)
         self._tp_indicator.update(self._current_candle)
-
-        self._oanda._create_plot_record("short", self._short_ema.value)
-        self._oanda._create_plot_record("medium", self._medium_ema.value)
-        self._oanda._create_plot_record("long", self._long_sma.value)
-
-        self._previous_cross = self._current_cross
-        self._current_cross = self.check_crosses()
 
         sl = self._sl_indicator.GetState()
         if sl == MarketTrend.STOP_LONG or sl == MarketTrend.STOP_SHORT:
@@ -153,7 +137,8 @@ class Strategy(object):
                 self._tp_indicator.CancelTakeProfit()
                 return
 
-        if self._previous_cross[0] == False and self._current_cross[0] == True:
+        ma = self._macross.GetState()
+        if ma == MarketTrend.ENTER_LONG:
             if self._oanda.current_position() != 0 and self._oanda.current_side(
             ) == MarketTrend.ENTER_LONG:
                 return
@@ -162,10 +147,12 @@ class Strategy(object):
                 self._tp_indicator.SetTakeProfit(
                     self._logging_current_price - self._take_profit,
                     MarketTrend.ENTER_LONG)
-                self._sl_indicator.SetStop(MarketTrend.ENTER_LONG)
+                self._sl_indicator.SetStop(
+                    self._logging_current_price - self._stop_loss,
+                    MarketTrend.ENTER_LONG)
                 self.Buy()
-
-        if self._previous_cross[1] == False and self._current_cross[1] == True:
+                return
+        elif ma == MarketTrend.ENTER_SHORT:
             if self._oanda.current_position() != 0 and self._oanda.current_side(
             ) == MarketTrend.ENTER_SHORT:
                 return
@@ -173,14 +160,12 @@ class Strategy(object):
                 self.ClosePosition('long')
                 self._tp_indicator.SetTakeProfit(
                     self._logging_current_price + self._take_profit,
-                    MarketTrend.ENTER_LONG)
-                self._sl_indicator.SetStop(MarketTrend.ENTER_SHORT)
+                    MarketTrend.ENTER_SHORT)
+                self._sl_indicator.SetStop(
+                    self._logging_current_price - self._stop_loss,
+                    MarketTrend.ENTER_SHORT)
                 self.Sell()
-
-    def check_crosses(self):
-        buycross = self._short_ema.value > self._medium_ema.value and self._short_ema.value > self._long_sma.value
-        sellcross = self._short_ema.value < self._medium_ema.value and self._short_ema.value < self._long_sma.value
-        return [buycross, sellcross]
+                return
 
     def Buy(self):
         logging.info("Strategy Buy() called. Going long @ " +

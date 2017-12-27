@@ -63,7 +63,6 @@ class TrailingStop(Indicator):
                     self.trading_enabled = False
 
     def update(self, datapoint):
-
         if not isinstance(datapoint, Candle):
             self.Tickerupdate(datapoint)
             return
